@@ -1,4 +1,4 @@
-// app/auth.ts or wherever you place your auth logic
+// // app/auth.ts or wherever you place your auth logic
 import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import authConfig from "@/auth.config";
