@@ -45,39 +45,16 @@ export const EditApprovedUserSchema = z.object({
 
 
 // Schema for the admin popup approval form
-export const ApproveUserPopupSchema = z.object({
-  groupId: z.string().min(1, { message: "Group is required" }),
-  whitelisted: z.boolean(),
-  allowedTradingAmountFrom: z.preprocess(
-    (a) => Number(a),
-    z.number().min(0, { message: "Minimum trading amount must be 0 or more" })
-  ),
-  allowedTradingAmountTo: z.preprocess(
-    (a) => {
-      if (typeof a === "string" && a.trim().toLowerCase() === "unlimited") {
-        return "Unlimited";
-      }
-      return Number(a);
-    },
-    z.union([
-      z.number().min(0, { message: "Maximum trading amount must be 0 or more" }),
-      z.literal("Unlimited"),
-    ])
-  ),
-  adminFee: z.preprocess(
-    (a) => Number(a),
-    z.number().min(0, { message: "Admin fee must be 0 or more" })
-  ),
-  userProfit: z.preprocess(
-    (a) => Number(a),
-    z.number().min(0, { message: "User profit must be 0 or more" })
-  ),
-  introducerFee: z.preprocess(
-    (a) => Number(a),
-    z.number().min(0, { message: "Introducer fee must be 0 or more" })
-  ),
-});
 
+export const ApproveUserPopupSchema = z.object({
+  groupId: z.string().min(1, "Group is required"),
+  whitelisted: z.boolean(),
+  allowedTradingAmountFrom: z.number().nonnegative(),
+  allowedTradingAmountTo: z.union([z.number().nonnegative(), z.literal("Unlimited")]),
+  adminFee: z.number().nonnegative(),
+  userProfit: z.number().nonnegative(),
+  introducerFee: z.number().nonnegative(),
+});
 
 export const NewPasswordSchema = z.object({
   password: z.string().min(6, {
