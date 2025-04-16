@@ -1,17 +1,25 @@
 "use server";
 
 import * as z from "zod";
-
 import { getUserById } from "@/data/user";
 import { db } from "@/lib/db";
 import { EditApprovedUserSchema } from "@/schemas";
 import { revalidatePath } from "next/cache";
+import { currentRole } from "@/lib/auth";
 
 export const deleteUserById = async (userId: string) => {
+  // Ensure only admin users can perform this action.
+  const role = await currentRole();
+  if (role !== "ADMIN") {
+    return { error: "Unauthorized: Admin access required." };
+  }
+
   try {
     await db.user.delete({
       where: { id: userId },
     });
+    // Optionally revalidate a related path after deletion.
+    revalidatePath("/approveduser");
     return { success: "User rejected and removed successfully!" };
   } catch (error) {
     console.error("Error rejecting user:", error);
@@ -20,6 +28,12 @@ export const deleteUserById = async (userId: string) => {
 };
 
 export const getAllUsers = async () => {
+  // Restrict this action to admin users.
+  const role = await currentRole();
+  if (role !== "ADMIN") {
+    return { error: "Unauthorized: Admin access required." };
+  }
+
   try {
     const users = await db.user.findMany({
       where: { approved: false },
@@ -33,12 +47,18 @@ export const getAllUsers = async () => {
 };
 
 export const getApprovedUsers = async () => {
+  // Restrict this action to admin users.
+  const role = await currentRole();
+  if (role !== "ADMIN") {
+    return { error: "Unauthorized: Admin access required." };
+  }
+
   try {
     const users = await db.user.findMany({
       where: { approved: true },
       orderBy: { createdAt: "desc" },
     });
-    // Normalize whitelisted field
+    // Normalize whitelisted field.
     return users.map(user => ({
       ...user,
       whitelisted: user.whitelisted ?? false,
@@ -53,12 +73,19 @@ export const updateApprovedUser = async (
   userId: string,
   values: z.infer<typeof EditApprovedUserSchema>
 ) => {
+  // Ensure only admin users can perform this action.
+  const role = await currentRole();
+  if (role !== "ADMIN") {
+    return { error: "Unauthorized: Admin access required." };
+  }
+
+  // Validate incoming values using the centralized schema.
   const parsed = EditApprovedUserSchema.safeParse(values);
   if (!parsed.success) {
-    const errorMessages = parsed.error.errors.map((err) => err.message).join(", ");
+    const errorMessages = parsed.error.errors.map(err => err.message).join(", ");
     return { error: errorMessages || "Invalid fields!" };
   }
-  
+
   const {
     firstname,
     lastname,
@@ -77,6 +104,7 @@ export const updateApprovedUser = async (
     introducerFee,
   } = parsed.data;
 
+  // Ensure the target user exists.
   const existingUser = await getUserById(userId);
   if (!existingUser) {
     return { error: "User not found" };
@@ -107,6 +135,7 @@ export const updateApprovedUser = async (
         introducerFee,
       },
     });
+    // Revalidate the approved user page (adjust the path as needed).
     revalidatePath("/approveduser");
     return { success: "User updated successfully!", user: updatedUser };
   } catch (error) {
