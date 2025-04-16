@@ -14,36 +14,67 @@ export const EditApprovedUserSchema = z.object({
   approved: z.boolean(),
   whitelisted: z.boolean(),
   groupId: z.string(),
-  
-  // Allow either a numeric value or the literal "Unlimited"
-  allowedTradingAmountFrom: z.preprocess(
-    (val) => Number(val),
-    z.number().min(0, { message: "Minimum amount must be 0 or more" })
-  ),
-  allowedTradingAmountTo: z.preprocess((val) => {
-    if (typeof val === "string" && val.trim().toLowerCase() === "unlimited") {
-      return "Unlimited";
-    }
-    return Number(val);
-  }, z.union([
-    z.number().min(0, { message: "Maximum amount must be 0 or more" }),
-    z.literal("Unlimited")
-  ])),
-  adminFee: z.preprocess(
-    (val) => Number(val),
-    z.number().min(0, { message: "Admin fee must be 0 or more" })
-  ),
-  userProfit: z.preprocess(
-    (val) => Number(val),
-    z.number().min(0, { message: "User profit must be 0 or more" })
-  ),
-  introducerFee: z.preprocess(
-    (val) => Number(val),
-    z.number().min(0, { message: "Introducer fee must be 0 or more" })
-  ),
+
+  allowedTradingAmountFrom: z
+    .preprocess(
+      (val) => {
+        // If val is empty, null, or undefined, return 0.
+        if (val === undefined || val === null || val === "") return 0;
+        const num = Number(val);
+        return isNaN(num) ? 0 : num;
+      },
+      z.number().min(0, { message: "Minimum must be 0 or more" })
+    )
+    .default(0), // ensure it's always present as a number
+
+  allowedTradingAmountTo: z
+    .preprocess((val) => {
+      // If the value is "unlimited" (case-insensitive) return the literal
+      if (typeof val === "string" && val.trim().toLowerCase() === "unlimited") {
+        return "Unlimited";
+      }
+      if (val === undefined || val === null || val === "") return 0;
+      const num = Number(val);
+      return isNaN(num) ? 0 : num;
+    }, z.union([
+      z.number().min(0, { message: "Maximum must be 0 or more" }),
+      z.literal("Unlimited")
+    ]))
+    .default(0),
+
+  adminFee: z
+    .preprocess(
+      (val) => {
+        if (val === undefined || val === null || val === "") return 0;
+        const num = Number(val);
+        return isNaN(num) ? 0 : num;
+      },
+      z.number().min(0, { message: "Admin fee must be 0 or more" })
+    )
+    .default(0),
+
+  userProfit: z
+    .preprocess(
+      (val) => {
+        if (val === undefined || val === null || val === "") return 0;
+        const num = Number(val);
+        return isNaN(num) ? 0 : num;
+      },
+      z.number().min(0, { message: "User profit must be 0 or more" })
+    )
+    .default(0),
+
+  introducerFee: z
+    .preprocess(
+      (val) => {
+        if (val === undefined || val === null || val === "") return 0;
+        const num = Number(val);
+        return isNaN(num) ? 0 : num;
+      },
+      z.number().min(0, { message: "Introducer fee must be 0 or more" })
+    )
+    .default(0),
 });
-
-
 // Schema for the admin popup approval form
 
 export const ApproveUserPopupSchema = z.object({

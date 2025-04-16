@@ -1,7 +1,6 @@
 "use client";
 
 import * as z from "zod";
-
 import React, { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { KeyedMutator } from "swr";
@@ -20,8 +19,11 @@ import {
 } from "@/components/ui/form";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Input } from "@/components/ui/input";
 
-type EditApprovedUserSchemaType = z.infer<typeof EditApprovedUserSchema>;
+// We get the input type and the output type from the schema:
+type EditApprovedUserInput = z.input<typeof EditApprovedUserSchema>;
+type EditApprovedUserOutput = z.infer<typeof EditApprovedUserSchema>;
 
 interface EditApprovedUserProps {
   user: IUser;
@@ -33,28 +35,30 @@ const EditApprovedUser: React.FC<EditApprovedUserProps> = ({ user, onClose, muta
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
 
-  const form = useForm<EditApprovedUserSchemaType>({
-    resolver: zodResolver(EditApprovedUserSchema),
-    defaultValues: {
-      firstname: user.firstname,
-      lastname: user.lastname,
-      phone: user.phone,
-      country: user.country,
-      metamask: user.metamask,
-      autotrade: user.autotrade,
-      email: user.email,
-      approved: user.approved,
-      whitelisted: user.whitelisted ?? false,
-      groupId: user.groupId ?? "",
-      allowedTradingAmountFrom: user.allowedTradingAmountFrom ?? 0,
-      allowedTradingAmountTo: user.allowedTradingAmountTo ?? 0,
-      adminFee: user.adminFee ?? 0,
-      userProfit: user.userProfit ?? 0,
-      introducerFee: user.introducerFee ?? 0,
-    },
-  });
+  // Note: The second generic (context) we leave as unknown (or omit) if you don’t need it.
+  const form = useForm<EditApprovedUserInput, unknown, z.infer<typeof EditApprovedUserSchema>>({
+  resolver: zodResolver(EditApprovedUserSchema),
+  defaultValues: {
+    firstname: user.firstname,
+    lastname: user.lastname,
+    phone: user.phone,
+    country: user.country,
+    metamask: user.metamask,
+    autotrade: user.autotrade,
+    email: user.email,
+    approved: user.approved,
+    whitelisted: user.whitelisted ?? false,
+    groupId: user.groupId ?? "",
+    allowedTradingAmountFrom: user.allowedTradingAmountFrom ?? undefined,
+    allowedTradingAmountTo: user.allowedTradingAmountTo ?? undefined,
+    adminFee: user.adminFee ?? undefined,
+    userProfit: user.userProfit ?? undefined,
+    introducerFee: user.introducerFee ?? undefined,
+  },
+});
 
-  // Custom handler to auto-populate related fields when the group is changed.
+
+  // Handler to auto-populate fields based on group selection.
   const handleGroupChange: React.ChangeEventHandler<HTMLSelectElement> = (e) => {
     const groupId = e.target.value;
     form.setValue("groupId", groupId);
@@ -64,12 +68,12 @@ const EditApprovedUser: React.FC<EditApprovedUserProps> = ({ user, onClose, muta
       form.setValue("userProfit", preset.userProfit);
       form.setValue("introducerFee", preset.introducerFee);
       form.setValue("allowedTradingAmountFrom", preset.allowedTradingAmountFrom);
-      // Cast the preset value for allowedTradingAmountTo to number | "Unlimited"
       form.setValue("allowedTradingAmountTo", preset.allowedTradingAmountTo as number | "Unlimited");
     }
   };
 
-  const onSubmit = (values: EditApprovedUserSchemaType) => {
+  // The onSubmit handler receives the output type (with transforms applied)
+  const onSubmit = (values: EditApprovedUserOutput) => {
     setError("");
     startTransition(async () => {
       try {
@@ -265,99 +269,130 @@ const EditApprovedUser: React.FC<EditApprovedUserProps> = ({ user, onClose, muta
                   </FormItem>
                 )}
               />
-              {/* Allowed Trading Amount From */}
-              <FormField
-                control={form.control}
-                name="allowedTradingAmountFrom"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Allowed Trading Amount From</FormLabel>
-                    <FormControl>
-                      <input 
-                        type="number" 
-                        {...field} 
-                        className="bg-gray-800 text-gray-200 w-full p-2 rounded" 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Allowed Trading Amount To */}
-              <FormField
-                control={form.control}
-                name="allowedTradingAmountTo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Allowed Trading Amount To</FormLabel>
-                    <FormControl>
-                      {/* Using type "text" so that it can handle numbers or "Unlimited" */}
-                      <input 
-                        type="text" 
-                        {...field} 
-                        className="bg-gray-800 text-gray-200 w-full p-2 rounded" 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Admin Fee */}
-              <FormField
-                control={form.control}
-                name="adminFee"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Admin Fee</FormLabel>
-                    <FormControl>
-                      <input 
-                        type="number" 
-                        {...field} 
-                        className="bg-gray-800 text-gray-200 w-full p-2 rounded" 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* User Profit */}
-              <FormField
-                control={form.control}
-                name="userProfit"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>User Profit (%)</FormLabel>
-                    <FormControl>
-                      <input 
-                        type="number" 
-                        {...field} 
-                        className="bg-gray-800 text-gray-200 w-full p-2 rounded" 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Introducer Fee */}
-              <FormField
-                control={form.control}
-                name="introducerFee"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Introducer Fee (%)</FormLabel>
-                    <FormControl>
-                      <input 
-                        type="number" 
-                        {...field} 
-                        className="bg-gray-800 text-gray-200 w-full p-2 rounded" 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            {/* Allowed Trading Amount From */}
+<FormField
+  control={form.control}
+  name="allowedTradingAmountFrom"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Allowed Trading Amount From</FormLabel>
+      <FormControl>
+        <input 
+          type="number" 
+          {...field}
+          value={typeof field.value === "number" ? field.value : ""}
+          className="bg-gray-800 text-gray-200 w-full p-2 rounded" 
+        />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
 
+{/* Allowed Trading Amount To */}
+<FormField
+  control={form.control}
+  name="allowedTradingAmountTo"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Allowed Trading Amount To</FormLabel>
+      <FormControl>
+        <input 
+          type="text" 
+          {...field}
+          value={
+            typeof field.value === "string" || typeof field.value === "number"
+              ? field.value
+              : ""
+          }
+          className="bg-gray-800 text-gray-200 w-full p-2 rounded" 
+        />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+{/* Admin Fee */}
+<FormField
+  control={form.control}
+  name="adminFee"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Admin Fee</FormLabel>
+      <FormControl>
+        <input 
+          type="number" 
+          {...field}
+          value={typeof field.value === "number" ? field.value : ""}
+          className="bg-gray-800 text-gray-200 w-full p-2 rounded" 
+        />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+{/* User Profit */}
+<FormField
+  control={form.control}
+  name="userProfit"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>User Profit (%)</FormLabel>
+      <FormControl>
+        <input 
+          type="number" 
+          {...field}
+          value={typeof field.value === "number" ? field.value : ""}
+          className="bg-gray-800 text-gray-200 w-full p-2 rounded" 
+        />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+{/* Introducer Fee */}
+<FormField
+  control={form.control}
+  name="introducerFee"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Introducer Fee (%)</FormLabel>
+      <FormControl>
+        <input 
+          type="number" 
+          {...field}
+          value={typeof field.value === "number" ? field.value : ""}
+          className="bg-gray-800 text-gray-200 w-full p-2 rounded" 
+        />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+           {/* Introducer Fee */}
+<FormField
+  control={form.control}
+  name="introducerFee"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Introducer Fee (%)</FormLabel>
+      <FormControl>
+        <input 
+          type="number" 
+          {...field}
+          value={typeof field.value === "number" ? field.value : ""}
+          className="bg-gray-800 text-gray-200 w-full p-2 rounded" 
+        />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+</div>
             {error && <p className="text-red-500">{error}</p>}
 
             <div className="flex justify-end space-x-2 mt-4">
