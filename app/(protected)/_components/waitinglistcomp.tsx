@@ -64,7 +64,7 @@ const confirmToast = (message: string): Promise<boolean> => {
 };
 
 const WaitingListComp: React.FC = () => {
-  const { data: users, mutate } = useSWR<IUser[]>("/pendingusers", getAllUsers);
+  const { data: users, mutate } = useSWR<IUser[]>("/admin/waitinglist", getAllUsers);
   const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
 
   // Filter pending users (approved === false)

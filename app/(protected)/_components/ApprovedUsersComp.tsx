@@ -5,10 +5,11 @@ import useSWR, { KeyedMutator } from "swr";
 import EditApprovedUser from "./EditApprovedUser";
 import { deleteUserById } from "@/actions/adminActions";
 import { IUser } from "@/interface";
-import { getApprovedUsers } from "@/actions/waitinglist-action";
+
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaEdit, FaTrash, FaSearch } from "react-icons/fa";
+import { getApprovedUsers } from "@/actions/waitinglist-action";
 
 // Map numeric group IDs to group names based on your select options.
 const groupMapping: Record<number, string> = {
@@ -89,7 +90,7 @@ const confirmToast = (message: string): Promise<boolean> => {
 };
 
 const ApprovedUsersComp = () => {
-  const { data: users, mutate } = useSWR<IUser[]>("/approveduser", getApprovedUsers);
+  const { data: users, mutate } = useSWR<IUser[]>("/admin/approveduser", getApprovedUsers);
   const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
 
   // Search state

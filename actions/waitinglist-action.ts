@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { EditApprovedUserSchema } from "@/schemas";
 import { revalidatePath } from "next/cache";
 import { currentRole } from "@/lib/auth";
+import { IUser } from "@/interface";
 
 export const deleteUserById = async (userId: string) => {
   // Ensure only admin users can perform this action.
@@ -27,46 +28,39 @@ export const deleteUserById = async (userId: string) => {
   }
 };
 
-export const getAllUsers = async () => {
-  // Restrict this action to admin users.
+export const getAllUsers = async (_url: string): Promise<IUser[]> => {
+  // Role check
   const role = await currentRole();
   if (role !== "ADMIN") {
-    return { error: "Unauthorized: Admin access required." };
+    // Throw so SWR sets `error`
+    throw new Error("Unauthorized: Admin access required.");
   }
 
-  try {
-    const users = await db.user.findMany({
-      where: { approved: false },
-      orderBy: { createdAt: "desc" },
-    });
-    return users;
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    return [];
-  }
+  // Fetch
+  const users = await db.user.findMany({
+    where: { approved: false },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return users;
 };
 
-export const getApprovedUsers = async () => {
-  // Restrict this action to admin users.
+export const getApprovedUsers = async (_key: string): Promise<IUser[]> => {
+  // Role‑check is still fine, but on failure throw so SWR sees an error
   const role = await currentRole();
   if (role !== "ADMIN") {
-    return { error: "Unauthorized: Admin access required." };
+    throw new Error("Unauthorized: Admin access required.");
   }
 
-  try {
-    const users = await db.user.findMany({
-      where: { approved: true },
-      orderBy: { createdAt: "desc" },
-    });
-    // Normalize whitelisted field.
-    return users.map(user => ({
-      ...user,
-      whitelisted: user.whitelisted ?? false,
-    }));
-  } catch (error) {
-    console.error("Error fetching approved users:", error);
-    return [];
-  }
+  const users = await db.user.findMany({
+    where: { approved: true },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return users.map((user) => ({
+    ...user,
+    whitelisted: user.whitelisted ?? false,
+  }));
 };
 
 export const updateApprovedUser = async (
