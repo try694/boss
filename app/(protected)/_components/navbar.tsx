@@ -34,7 +34,7 @@ export default function Navbar({ isOpen, toggleSidebar }: NavbarProps) {
             </Link>
           </li>
 
-          {/* Admin-only nav items wrapped in RoleGate */}
+          {/* Admi-only nav items wrapped in RoleGate */}
           <RoleGate allowedRole={UserRole.ADMIN}>
             <li>
               <Link
