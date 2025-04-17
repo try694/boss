@@ -1,3 +1,4 @@
+// components/auth/login-form.tsx
 "use client";
 
 import * as z from "zod";
@@ -39,16 +40,17 @@ export const LoginForm = () => {
     setError("");
     setSuccess("");
     setLoading(true);
-  
+
     try {
       const data = await login(values);
       if (data.error) {
         setError(data.error);
       } else if (data.success) {
         setSuccess(data.success);
-        setTimeout(() => {
-          router.push("/settings");
-        }, 1500);
+        // SPA-style: signIn succeeded, now refresh server components
+        router.refresh();
+        // Navigate to settings
+        router.push("/settings");
       }
     } catch (err) {
       setError("Unexpected error. Please try again.");
@@ -65,30 +67,26 @@ export const LoginForm = () => {
         backButtonHref="/auth/register"
       >
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-6"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-4">
-            <FormField
-  control={form.control}
-  name="username"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Username</FormLabel>
-      <FormControl>
-        <input
-          {...field}
-          disabled={loading}
-          placeholder="username123"
-          className="bg-gray-900 border border-gray-800 w-full rounded-md p-2 text-sm md:text-base placeholder-gray-400 disabled:opacity-75"
-        />
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
-
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <input
+                        {...field}
+                        disabled={loading}
+                        placeholder="username123"
+                        className="bg-gray-900 border border-gray-800 w-full rounded-md p-2 text-sm md:text-base placeholder-gray-400 disabled:opacity-75"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}

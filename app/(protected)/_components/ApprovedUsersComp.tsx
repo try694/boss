@@ -206,6 +206,7 @@ const ApprovedUsersComp = () => {
         <table className="min-w-full table-fixed rounded-lg shadow-lg bg-black-gradient border border-gray-700">
           <thead>
             <tr className="bg-gray-900 text-gray-400 border-b border-gray-700">
+            <th className="p-1 md:p-3 text-left max-w-[12ch] whitespace-nowrap">User Name</th>
               <th className="p-1 md:p-3 text-left max-w-[12ch] whitespace-nowrap">First Name</th>
               <th className="p-1 md:p-3 text-left max-w-[12ch] whitespace-nowrap">Last Name</th>
               <th className="p-1 md:p-3 text-left max-w-[12ch] whitespace-nowrap">Phone</th>
@@ -219,6 +220,7 @@ const ApprovedUsersComp = () => {
           <tbody>
             {currentPageUsers.map((user) => (
               <tr key={user.id} className="border-b border-gray-700 hover:bg-gray-800">
+                <td className="p-1 md:p-3 text-gray-200 whitespace-nowrap">{user.username}</td>
                 <td className="p-1 md:p-3 text-gray-200 whitespace-nowrap">{user.firstname}</td>
                 <td className="p-1 md:p-3 text-gray-200 whitespace-nowrap">{user.lastname}</td>
                 <td className="p-1 md:p-3 text-gray-200 whitespace-nowrap">{user.phone}</td>
