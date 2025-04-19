@@ -1,28 +1,21 @@
 // app/(protected)/layout.tsx
-import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getUserById } from "@/data/user";
 import ClientDashboardLayout from "./ClientDashboardLayout";
 
-export default async function ProtectedLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
-  // 1) Grab the session
+export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
-  if (!session?.user?.id) {
-    // no session → redirect to login
-    redirect("/auth/login");
-  }
+  if (!session?.user?.id) redirect("/auth/login");
 
-  // 2) Fetch the full user record by ID
   const user = await getUserById(session.user.id);
-  if (!user) {
-    redirect("/auth/login");
-  }
+  if (!user) redirect("/auth/login");
 
-  // 3) Render the client layout with the user prop
-  return <ClientDashboardLayout user={user}>{children}</ClientDashboardLayout>;
+  const isAdmin = user.role === "ADMIN";
+
+  return (
+    <ClientDashboardLayout user={user} isAdmin={isAdmin}>
+      {children}
+    </ClientDashboardLayout>
+  );
 }
