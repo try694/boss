@@ -22,8 +22,8 @@ export default function Navbar({ isOpen, toggleSidebar }: NavbarProps) {
 
   const navItems = [
     { href: "/settings",        icon: <FiHome />,     text: "Overview",    adminOnly: false },
-    { href: "/auth/approveduser",    icon: <FiBarChart2 />, text: "Members",     adminOnly: true  },
-     { href: "/auth/waitinglist",     icon: <FiUser />,      text: "Waiting List",adminOnly: true  },
+    { href: "/admin/approveduser",    icon: <FiBarChart2 />, text: "Members",     adminOnly: true  },
+     { href: "/admin/waitinglist",     icon: <FiUser />,      text: "Waiting List",adminOnly: true  },
     // { href: "/dashboard/v2trades", icon: <FiBarChart2 />, text: "V2 Trades", adminOnly: false },
     // { href: "/dashboard/v3trades", icon: <FiBarChart2 />, text: "V3 Trades", adminOnly: false },
     // { href: "/dashboard/v4trades", icon: <FiBarChart2 />, text: "V4 Trades", adminOnly: false },
