@@ -18,6 +18,7 @@ export async function getUserById(id: string) {
     where: { id },
     select: {
       id: true,
+      username: true,
       firstname: true,
       lastname: true,
       email: true,

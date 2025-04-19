@@ -32,7 +32,7 @@ export default function LandingPage() {
           </p>
           <Link
             href="/auth/login"
-            className="inline-block mt-4 px-8 py-3 bg-gray-950 text-white font-semibold text-base md:text-lg rounded-xl shadow-lg hover:shadow-2xl transition duration-300"
+            className="inline-block border border-gray-800 mt-4 px-8 py-3 bg-gray-950 text-white font-semibold text-base md:text-lg rounded-xl shadow-lg hover:shadow-2xl transition duration-300"
           >
             Get Started
           </Link>
